@@ -51,6 +51,8 @@
     <string name="settings_silence_call_description">Define se o som de toque deve ser silenciado para ligação recebida. A própria ligação, se não for bloqueada, ainda será enviada ao app de discagem padrão. Esta opção só é válida se você escolheu não bloquear as ligações.</string>
     <string name="settings_skip_call_log_description">Define se a ligação recebida deve ou não ser exibida no registro de ligações. Isto só deve ser selecionado se a ligação for bloqueada. As ligações ainda serão registradas como BLOCKED_TYPE.</string>
     <string name="settings_skip_notification_description">Define se a notificação de ligação perdida deve ou não ser exibida para a ligação recebida. Isto só deve ser selecionado se a ligação for bloqueada.</string>
+    <string name="settings_theme_amoled">Tema AMOLED</string>
+    <string name="settings_theme_amoled_description">Usar fundo preto puro no tema escuro para economizar bateria.</string>
     <string name="groups_mobile">Celular</string>
     <string name="extra_unknown_numbers_description">Permitir ligações de desconhecidos sem número.</string>
     <string name="extra">Extra</string>

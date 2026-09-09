@@ -67,6 +67,15 @@ fun SettingsScreen(ctx: Context, prefs: Preferences, onBackPressed: () -> Boolea
             description = R.string.settings_controller_description,
             dividerBefore = true,
         ),
+        Preference(
+            getValue = { prefs.isAmoledTheme },
+            setValue = { isChecked ->
+                prefs.isAmoledTheme = isChecked
+            },
+            name = R.string.settings_theme_amoled,
+            description = R.string.settings_theme_amoled_description,
+            dividerBefore = true,
+        ),
     )
     Screen(title = R.string.settings,
         onBackPressed = onBackPressed,

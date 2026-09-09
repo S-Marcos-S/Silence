@@ -79,6 +79,8 @@
     <string name="settings_skip_call_log_description">Sets whether the incoming call should not be displayed in the call log. This should only be checked if the call is disallowed. Calls will still be logged with type BLOCKED_TYPE.</string>
     <string name="settings_skip_notification">Skip notification</string>
     <string name="settings_skip_notification_description">Sets whether a missed call notification should not be shown for the incoming call. This should only be checked if the call is disallowed.</string>
+    <string name="settings_theme_amoled">AMOLED theme</string>
+    <string name="settings_theme_amoled_description">Use pure black background in dark theme to save battery.</string>
     <string name="panic_app_dialog_title">Confirm panic app</string>
     <string name="panic_app_dialog_message">Are you sure you want to allow %1$s to trigger destructive panic actions\?</string>
     <string name="panic_app_unknown_app">an unknown app</string>

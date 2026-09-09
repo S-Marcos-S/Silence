@@ -42,11 +42,13 @@ class Preferences(ctx: Context) {
         const val SIM = "sim"
         const val GENERAL_UNKNOWN_NUMBERS_CHECKED = "general_unknown_numbers_checked"
 
+        const val THEME_AMOLED = "theme_amoled"
+
         const val MIGRATION_VERSION = "migration_version"
         const val CURRENT_MIGRATION_VERSION = 1
     }
 
-    private val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
+    internal val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
 
     var isEnabled: Boolean
         get() = prefs.getBoolean(ENABLED, false)
@@ -191,6 +193,10 @@ class Preferences(ctx: Context) {
     var regexPatternBlock: String?
         get() = prefs.getString(REGEX_PATTERN_BLOCK, "")
         set(value) = prefs.edit { putString(REGEX_PATTERN_BLOCK, value) }
+
+    var isAmoledTheme: Boolean
+        get() = prefs.getBoolean(THEME_AMOLED, false)
+        set(value) = prefs.edit { putBoolean(THEME_AMOLED, value) }
 }
 
 enum class Contact(override val value: Int) : FlagValue {
