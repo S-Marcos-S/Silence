@@ -103,6 +103,17 @@ function Get-AutoCommitMessage {
     return "feat: update $summaryFiles"
 }
 
+# Tentar obter token de autenticação do Git Credential Manager se não foi informado
+if (-not $GitHubToken) {
+    try {
+        $cred = @("protocol=https", "host=github.com") | git credential fill 2>$null
+        $tokenLine = $cred | Where-Object { $_ -like "password=*" }
+        if ($tokenLine) {
+            $GitHubToken = $tokenLine.Substring(9).Trim()
+        }
+    } catch {}
+}
+
 $headers = @{
     "User-Agent" = "Silence-Build-Script"
     "Accept" = "application/vnd.github+json"
@@ -174,9 +185,14 @@ while (-not $run -and $retryCount -lt $maxRetries) {
             break
         }
     } catch {
-        Write-Warn "Aguardando GitHub registrar o workflow (tentativa $retryCount/$maxRetries)..."
+        if ($_.Exception.Message -like "*rate limit*") {
+            Write-Warn "Aguardando liberação de taxa da API do GitHub (tentativa $retryCount/$maxRetries)..."
+            Start-Sleep -Seconds 8
+        } else {
+            Write-Warn "Aguardando GitHub registrar o workflow (tentativa $retryCount/$maxRetries)..."
+        }
     }
-    Start-Sleep -Seconds 4
+    Start-Sleep -Seconds 5
 }
 
 if (-not $run) {
