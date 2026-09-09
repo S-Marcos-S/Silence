@@ -114,15 +114,15 @@ if ($GitHubToken) {
 
 # 1. Push opcional das alterações
 if ($PushChanges) {
-    Write-Info "Verificando status do Git..."
+    Write-Info "Verificando se há alterações no código..."
     $status = git status --porcelain
     if ($status) {
         if ([string]::IsNullOrWhiteSpace($CommitMessage)) {
             $suggestedMsg = Get-AutoCommitMessage
             Write-Host ""
-            Write-Host "Foram detectadas alteracoes no projeto prontas para commit." -ForegroundColor Cyan
-            Write-Host "Sugestao de titulo gerada: '$suggestedMsg'" -ForegroundColor Yellow
-            $inputMsg = Read-Host "Digite o nome/mensagem do commit (Enter para usar a sugestao)"
+            Write-Host "Foram detectadas alterações no projeto prontas para commit." -ForegroundColor Cyan
+            Write-Host "Sugestão de título gerada: '$suggestedMsg'" -ForegroundColor Yellow
+            $inputMsg = Read-Host "Digite o nome/mensagem do commit (Enter para usar a sugestão)"
             if ([string]::IsNullOrWhiteSpace($inputMsg)) {
                 $CommitMessage = $suggestedMsg
             } else {
@@ -133,13 +133,22 @@ if ($PushChanges) {
         Write-Info "Criando commit: '$CommitMessage'..."
         git add -A
         git commit -m $CommitMessage
+        Write-Info "Enviando alterações para origin/master (git push)..."
+        git push origin master
+        Write-Success "Push realizado com sucesso!"
+        Start-Sleep -Seconds 3
     } else {
-        Write-Info "Nenhuma alteração pendente para commit."
+        Write-Info "Nenhuma alteração pendente no código para commit."
+        $unpushed = git cherry -v 2>$null
+        if ($unpushed) {
+            Write-Info "Encontrados commits locais ainda não enviados. Fazendo push..."
+            git push origin master
+            Write-Success "Push realizado com sucesso!"
+            Start-Sleep -Seconds 3
+        } else {
+            Write-Info "Repositório local já está sincronizado com o GitHub."
+        }
     }
-    Write-Info "Enviando alterações para origin/master (git push)..."
-    git push origin master
-    Write-Success "Push realizado com sucesso!"
-    Start-Sleep -Seconds 3
 }
 
 # Obter o último commit hash local
