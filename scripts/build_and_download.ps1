@@ -52,6 +52,57 @@ function Write-Err([string]$msg) {
     Write-Host "[ERROR] $msg" -ForegroundColor Red
 }
 
+function Get-AutoCommitMessage {
+    $rawStatus = git status --porcelain
+    if (-not $rawStatus) {
+        return "chore: update repository"
+    }
+
+    $files = $rawStatus | ForEach-Object {
+        $line = $_.Trim()
+        if ($line.Length -gt 3) {
+            $line.Substring(3).Trim('"', ' ')
+        }
+    }
+
+    $hasUi = $files | Where-Object { $_ -like "*src/main/java/*/ui/*" }
+    $hasRes = $files | Where-Object { $_ -like "*src/main/res/*" }
+    $hasWorkflow = $files | Where-Object { $_ -like "*.github/workflows/*" }
+    $hasGradle = $files | Where-Object { $_ -like "*gradle*" -or $_ -like "*build.gradle*" }
+    $hasScript = $files | Where-Object { $_ -like "*scripts/*" -or $_ -like "*.bat" }
+    $hasPrefOrCore = $files | Where-Object { $_ -like "*Preferences.kt*" -or $_ -like "*MainActivity.kt*" }
+
+    $baseNames = $files | ForEach-Object { Split-Path $_ -Leaf } | Select-Object -Unique
+
+    if ($baseNames.Count -le 2) {
+        $joined = $baseNames -join " and "
+        if ($hasWorkflow) { return "ci: update $joined" }
+        if ($hasGradle) { return "build: update $joined" }
+        if ($hasScript) { return "chore: update $joined" }
+        if ($hasUi -or $hasRes) { return "feat(ui): update $joined" }
+        return "chore: update $joined"
+    }
+
+    if ($hasUi -and $hasPrefOrCore) {
+        return "feat(settings): update theme and preferences UI"
+    }
+    if ($hasUi -or $hasRes) {
+        return "feat(ui): update UI components and resources"
+    }
+    if ($hasWorkflow -and $hasScript) {
+        return "ci: improve build automation and workflows"
+    }
+    if ($hasGradle) {
+        return "build: update project build configuration"
+    }
+    if ($hasScript) {
+        return "chore: update project scripts"
+    }
+
+    $summaryFiles = ($baseNames | Select-Object -First 3) -join ", "
+    return "feat: update $summaryFiles"
+}
+
 $headers = @{
     "User-Agent" = "Silence-Build-Script"
     "Accept" = "application/vnd.github+json"
@@ -67,12 +118,13 @@ if ($PushChanges) {
     $status = git status --porcelain
     if ($status) {
         if ([string]::IsNullOrWhiteSpace($CommitMessage)) {
+            $suggestedMsg = Get-AutoCommitMessage
             Write-Host ""
             Write-Host "Foram detectadas alteracoes no projeto prontas para commit." -ForegroundColor Cyan
-            $defaultMsg = "feat: add amoled theme and update build workflow"
-            $inputMsg = Read-Host "Digite o nome/mensagem do commit (Enter para usar: '$defaultMsg')"
+            Write-Host "Sugestao de titulo gerada: '$suggestedMsg'" -ForegroundColor Yellow
+            $inputMsg = Read-Host "Digite o nome/mensagem do commit (Enter para usar a sugestao)"
             if ([string]::IsNullOrWhiteSpace($inputMsg)) {
-                $CommitMessage = $defaultMsg
+                $CommitMessage = $suggestedMsg
             } else {
                 $CommitMessage = $inputMsg.Trim()
             }
