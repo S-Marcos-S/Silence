@@ -26,7 +26,7 @@
 [CmdletBinding()]
 param(
     [switch]$PushChanges,
-    [string]$CommitMessage = "feat: add amoled theme and update build workflow",
+    [string]$CommitMessage,
     [string]$GitHubToken = $env:GITHUB_TOKEN,
     [string]$OutputDir = "./build-output"
 )
@@ -66,7 +66,19 @@ if ($PushChanges) {
     Write-Info "Verificando status do Git..."
     $status = git status --porcelain
     if ($status) {
-        Write-Info "Adicionando arquivos modificados e criando commit..."
+        if ([string]::IsNullOrWhiteSpace($CommitMessage)) {
+            Write-Host ""
+            Write-Host "Foram detectadas alteracoes no projeto prontas para commit." -ForegroundColor Cyan
+            $defaultMsg = "feat: add amoled theme and update build workflow"
+            $inputMsg = Read-Host "Digite o nome/mensagem do commit (Enter para usar: '$defaultMsg')"
+            if ([string]::IsNullOrWhiteSpace($inputMsg)) {
+                $CommitMessage = $defaultMsg
+            } else {
+                $CommitMessage = $inputMsg.Trim()
+            }
+            Write-Host ""
+        }
+        Write-Info "Criando commit: '$CommitMessage'..."
         git add -A
         git commit -m $CommitMessage
     } else {
@@ -108,7 +120,10 @@ while (-not $run -and $retryCount -lt $maxRetries) {
 
 if (-not $run) {
     Write-Err "Não foi possível localizar uma execução recente do workflow no GitHub."
-    Write-Warn "Verifique se o commit foi enviado para o GitHub ou acione o workflow manualmente na aba Actions."
+    Write-Warn "Se este repositório for um fork, o GitHub Actions vem desativado por padrão."
+    Write-Info "Acesse para ativar: https://github.com/$RepoOwner/$RepoName/actions"
+    Write-Info "Clique no botão verde: 'I understand my workflows, go ahead and enable them'."
+    Write-Info "Depois, execute o build novamente!"
     exit 1
 }
 
